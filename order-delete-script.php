@@ -19,7 +19,7 @@ $orderIds = ['1','2','3','4'];
 
 if(count($orderIds) > 0){
 	foreach($orderIds as $orderId){
-		$order = $objectManager->create('Magento\Sales\Model\Order')->load($orderId);
+		$order = $obj->create('Magento\Sales\Model\Order')->load($orderId);
 		$registry->register('isSecureArea','true');
 		$order->delete();
 		$registry->unregister('isSecureArea'); 
