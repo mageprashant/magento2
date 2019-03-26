@@ -1,0 +1,2 @@
+# The Admin User Create Command
+```php bin/magento admin:user:create --admin-user="prashant" --admin-password="prashant@123" --admin-email="admin@example.com" --admin-firstname="Admin" --admin-lastname="Admin"```
