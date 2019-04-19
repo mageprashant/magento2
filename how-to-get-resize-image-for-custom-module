@@ -1,0 +1,70 @@
+use Magento\Framework\App\Filesystem\DirectoryList;
+
+    public function __construct(
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+	    	\Magento\Framework\Filesystem $filesystem,
+	    	\Magento\Framework\Image\AdapterFactory $imageFactory
+    ) {
+        $this->storeManager = $storeManager;
+		    $this->filesystem = $filesystem;
+        $this->imageFactory = $imageFactory;
+    }
+
+    public function imageResize(
+        $src,
+        $width = 90,
+        $height = 54,
+        $dir = '/product/videos/'
+    ) {
+        $absPath = $this->filesystem
+                ->getDirectoryRead(DirectoryList::MEDIA)
+                ->getAbsolutePath('catalog/product') . $src;
+
+        if (!file_exists($absPath) || !$src) {
+            return false;
+        }
+		$width = 90;
+        $height = 54;
+       /*  list($width, $height) = getimagesize($absPath); */
+        $dirImage = $this->getNewDirectoryImage($src, $width, $height);
+
+        $resizeImage = $this->filesystem
+                ->getDirectoryRead(DirectoryList::MEDIA)
+                ->getAbsolutePath($dir) . $dirImage;
+
+        if (!file_exists($resizeImage)) {
+            $imageResize = $this->imageFactory->create();
+            $imageResize->open($absPath);
+            $imageResize->backgroundColor([255, 255, 255]);
+            $imageResize->constrainOnly(true);
+            $imageResize->keepTransparency(true);
+            $imageResize->keepFrame(true);
+            $imageResize->keepAspectRatio(true);
+            $imageResize->resize($width, $height);
+            $destination = $resizeImage;
+            $imageResize->save($destination);
+        }
+
+        return rtrim($this->storeManager->getStore()
+            ->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA), '/') .
+        $dir . $dirImage;
+    }
+
+    /**
+     * @param $src
+     * @param $width
+     * @param $height
+     * @return string
+     */
+    public function getNewDirectoryImage($src, $width, $height)
+    {
+        $segments = array_reverse(explode('/', $src));
+        $firstDir = substr($segments[0], 0, 1);
+        $secondDir = substr($segments[0], 1, 1);
+        return 'cache/' .
+        $width .
+        'x' .
+        $height .
+        '/' .
+        $segments[0];
+    }
